@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Website Informasi Desa</title>
+  <meta name="description" content="Informasi resmi desa: profil, perangkat desa, UMKM, berita, dan kontak." />
+  <!-- Font: Fraunces (serif editorial) + Poppins (UI). Fallback lokal bila offline. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css?v=5" />
+  <!-- Supabase JS v2 (lokal / vendored, tanpa CDN) -->
+  <script src="assets/vendor/supabase.js"></script>
+  <!-- GSAP untuk animasi (lokal) -->
+  <script src="assets/vendor/gsap.min.js"></script>
+</head>
+<body>
+  <div class="app">
+    <!-- Background dekoratif animatif -->
+    <div class="bg-decor" aria-hidden="true">
+      <span class="blob blob-1"></span>
+      <span class="blob blob-2"></span>
+      <span class="blob blob-3"></span>
+      <span class="blob blob-4"></span>
+    </div>
+
+    <!-- NAVBAR WEB -->
+    <nav class="navbar">
+      <div class="brand" data-back>
+        <span class="logo-sm" id="nav-logo">🏡</span>
+        <span id="nav-name">Desa</span>
+      </div>
+      <div class="nav-links" id="nav-links"><!-- diisi dari MENU_ITEMS --></div>
+      <button class="search-trigger-btn" id="btn-search-trigger" aria-label="Cari Informasi">
+        <span>🔍</span> <span class="search-hint-text">Cari...</span>
+      </button>
+    </nav>
+
+    <!-- HERO + MENU (tampilan awal) -->
+    <header class="hero" id="hero">
+      <div class="hero-bg" id="hero-bg" aria-hidden="true"></div>
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="hero-top-row">
+        <span class="hero-chip">🏡 Informasi Resmi Desa</span>
+        <span id="office-status-badge" class="status-badge closed">🔴 Kantor Tutup</span>
+      </div>
+      <div id="hero-logo" class="logo">🏡</div>
+      <h1 id="hero-name">Memuat…</h1>
+      <p class="motto" id="hero-motto"></p>
+      <div class="hero-scroll" aria-hidden="true">⬇</div>
+    </header>
+
+    <main class="container">
+      <div class="section-title">Menu Informasi Desa</div>
+      <div class="menu-grid" id="menu-grid">
+        <!-- diisi oleh public.js dari MENU_ITEMS -->
+      </div>
+
+      <!-- ===== VIEW: PROFIL ===== -->
+      <section class="view" id="section-profil">
+        <div class="view-head">
+          <button class="back-btn" data-back>← Kembali</button>
+          <div class="view-head-inner">
+            <span class="view-icon">🏡</span>
+            <div>
+              <h2>Profil Desa</h2>
+              <p>Sejarah, data, visi-misi, dan potensi desa.</p>
+            </div>
+          </div>
+        </div>
+        <div id="profil-content"><div class="spinner"></div></div>
+      </section>
+
+      <!-- ===== VIEW: PERANGKAT ===== -->
+      <section class="view" id="section-perangkat">
+        <div class="view-head">
+          <button class="back-btn" data-back>← Kembali</button>
+          <div class="view-head-inner">
+            <span class="view-icon">👥</span>
+            <div>
+              <h2>Perangkat Desa</h2>
+              <p>Daftar aparatur desa beserta tugasnya.</p>
+            </div>
+          </div>
+        </div>
+        <div id="perangkat-content"><div class="spinner"></div></div>
+      </section>
+
+      <!-- ===== VIEW: UMKM ===== -->
+      <section class="view" id="section-umkm">
+        <div class="view-head">
+          <button class="back-btn" data-back>← Kembali</button>
+          <div class="view-head-inner">
+            <span class="view-icon">🛍️</span>
+            <div>
+              <h2>UMKM Desa</h2>
+              <p>Usaha mikro, kecil, dan menengah di desa.</p>
+            </div>
+          </div>
+        </div>
+        <div id="umkm-content"><div class="spinner"></div></div>
+      </section>
+
+      <!-- ===== VIEW: BERITA ===== -->
+      <section class="view" id="section-berita">
+        <div class="view-head">
+          <button class="back-btn" data-back>← Kembali</button>
+          <div class="view-head-inner">
+            <span class="view-icon">📰</span>
+            <div>
+              <h2>Berita & Pengumuman</h2>
+              <p>Kabar terbaru dan pengumuman resmi desa.</p>
+            </div>
+          </div>
+        </div>
+        <div id="berita-content"><div class="spinner"></div></div>
+      </section>
+
+      <!-- ===== VIEW: AGENDA ===== -->
+      <section class="view" id="section-agenda">
+        <div class="view-head">
+          <button class="back-btn" data-back>← Kembali</button>
+          <div class="view-head-inner">
+            <span class="view-icon">📅</span>
+            <div>
+              <h2>Agenda & Kegiatan</h2>
+              <p>Jadwal acara, rapat, dan kegiatan mendatang.</p>
+            </div>
+          </div>
+        </div>
+        <div id="agenda-content"><div class="spinner"></div></div>
+      </section>
+
+      <!-- ===== VIEW: DOKUMEN ===== -->
+      <section class="view" id="section-dokumen">
+        <div class="view-head">
+          <button class="back-btn" data-back>← Kembali</button>
+          <div class="view-head-inner">
+            <span class="view-icon">📄</span>
+            <div>
+              <h2>Dokumen & Surat Layanan</h2>
+              <p>Formulir permohonan, Perdes, dan publikasi resmi.</p>
+            </div>
+          </div>
+        </div>
+        <div id="dokumen-content"><div class="spinner"></div></div>
+      </section>
+
+      <!-- ===== VIEW: PENGADUAN ===== -->
+      <section class="view" id="section-pengaduan">
+        <div class="view-head">
+          <button class="back-btn" data-back>← Kembali</button>
+          <div class="view-head-inner">
+            <span class="view-icon">💬</span>
+            <div>
+              <h2>Pengaduan & Aspirasi Warga</h2>
+              <p>Sampaikan laporan, usulan, dan pertanyaan langsung.</p>
+            </div>
+          </div>
+        </div>
+        <div id="pengaduan-content"><div class="spinner"></div></div>
+      </section>
+
+      <!-- ===== VIEW: GALERI ===== -->
+      <section class="view" id="section-galeri">
+        <div class="view-head">
+          <button class="back-btn" data-back>← Kembali</button>
+          <div class="view-head-inner">
+            <span class="view-icon">🖼️</span>
+            <div>
+              <h2>Galeri Foto</h2>
+              <p>Dokumentasi kegiatan dan potensi desa.</p>
+            </div>
+          </div>
+        </div>
+        <div id="galeri-content"><div class="spinner"></div></div>
+      </section>
+
+      <!-- ===== VIEW: KONTAK ===== -->
+      <section class="view" id="section-kontak">
+        <div class="view-head">
+          <button class="back-btn" data-back>← Kembali</button>
+          <div class="view-head-inner">
+            <span class="view-icon">📍</span>
+            <div>
+              <h2>Kontak & Lokasi</h2>
+              <p>Alamat kantor, layanan, dan peta desa.</p>
+            </div>
+          </div>
+        </div>
+        <div id="kontak-content"><div class="spinner"></div></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span class="footer-line"></span>
+      <div class="footer-text">📱 Diakses melalui QR di Gapura Desa</div>
+      <div class="footer-sub">Website Informasi Desa · Pemerintah Desa</div>
+    </footer>
+  </div>
+
+  <!-- ===== MOBILE BOTTOM NAV BAR ===== -->
+  <div class="mobile-bottom-nav">
+    <button class="nav-btn" data-back>
+      <span class="ic">🏡</span>
+      <span>Home</span>
+    </button>
+    <button class="nav-btn" data-nav-section="section-berita">
+      <span class="ic">📰</span>
+      <span>Berita</span>
+    </button>
+    <button class="nav-btn" id="btn-search-mobile">
+      <span class="ic">🔍</span>
+      <span>Cari</span>
+    </button>
+    <button class="nav-btn" data-nav-section="section-dokumen">
+      <span class="ic">📄</span>
+      <span>Surat</span>
+    </button>
+    <button class="nav-btn" data-nav-section="section-pengaduan">
+      <span class="ic">💬</span>
+      <span>Lapor</span>
+    </button>
+  </div>
+
+  <!-- ===== MODAL SEARCH GLOBAL ===== -->
+  <div class="modal-overlay" id="search-modal-overlay" aria-hidden="true">
+    <div class="modal-box search-modal-box">
+      <button class="modal-close" id="search-modal-close" aria-label="Tutup">×</button>
+      <div class="search-box-wrap">
+        <h3>🔍 Pencarian Informasi Desa</h3>
+        <input type="text" id="global-search-input" placeholder="Ketik kata kunci (mis. KTP, Kades, Berita, Kopi)..." autocomplete="off" />
+      </div>
+      <div id="search-results-list" class="search-results-list">
+        <div class="search-ph">Mulai mengetik untuk mencari berita, UMKM, perangkat, dokumen, atau agenda.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL DETAIL (popup) ===== -->
+  <div class="modal-overlay" id="modal-overlay" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal-close" id="modal-close" aria-label="Tutup">×</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- ===== CHATBOT "TANYA DESA" ===== -->
+  <div id="chatbot-root"></div>
+
+  <script src="assets/js/config.js?v=4"></script>
+  <script>
+    // Tampilkan pesan jelas jika library gagal dimuat (mis. offline)
+    if (typeof window.supabase === "undefined" || !window.supabase.createClient) {
+      document.getElementById("hero-name").textContent = "Gagal memuat library";
+      document.querySelector(".section-title").insertAdjacentHTML("beforebegin",
+        '<div style="padding:16px;color:#d9534f;background:#fff0f0;border:1px solid #f5c6cb;border-radius:12px;margin:12px">Library Supabase tidak terbaca. Pastikan file <code>assets/vendor/supabase.js</code> ada.</div>');
+    }
+  </script>
+  <script src="assets/js/public.js?v=5"></script>
+  <script src="assets/js/chatbot.js?v=2"></script>
+</body>
+</html>

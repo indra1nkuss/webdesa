@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Website Informasi Desa</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=5" />
+  <script src="assets/vendor/supabase.js"></script>
+  <script src="assets/vendor/gsap.min.js"></script>
+</head>
+<body>
+  <!-- LOGIN -->
+  <div id="auth-screen">
+    <div class="auth-wrap">
+      <h2>🔐 Login Admin</h2>
+      <div class="field">
+        <label>Email Admin</label>
+        <input type="email" id="email" placeholder="admin@desa.id" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" />
+      </div>
+      <button class="btn full" id="btn-login">Masuk Dashboard</button>
+      <p id="auth-msg" style="color:#d9534f;font-size:13px;margin-top:10px;text-align:center"></p>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dash-screen" style="display:none">
+    <div class="dashboard">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="logo-sm">⚙️</span>
+          <span>Admin Desa</span>
+        </div>
+        <nav class="nav">
+          <div class="nav-item active" data-tab="profil">🏡 Profil Desa</div>
+          <div class="nav-item" data-tab="perangkat">👥 Perangkat</div>
+          <div class="nav-item" data-tab="umkm">🛍️ UMKM</div>
+          <div class="nav-item" data-tab="berita">📰 Berita</div>
+          <div class="nav-item" data-tab="agenda">📅 Agenda</div>
+          <div class="nav-item" data-tab="dokumen">📄 Dokumen</div>
+          <div class="nav-item" data-tab="pengaduan">💬 Pengaduan</div>
+          <div class="nav-item" data-tab="galeri">🖼️ Galeri</div>
+        </nav>
+        <div class="logout" id="btn-logout">⎋ Keluar</div>
+      </aside>
+
+      <!-- MAIN -->
+      <div class="main">
+        <div class="topbar">
+          <h1 id="dash-title">Profil Desa</h1>
+          <div class="who">Panel Admin · WebInformasiDesa</div>
+        </div>
+
+    <!-- TAB: PROFIL -->
+    <div class="tab-panel active" id="tab-profil">
+      <form id="form-profil">
+        <div class="field"><label>Nama Desa</label><input id="p_village_name" /></div>
+        <div class="field"><label>Motto</label><input id="p_motto" /></div>
+        <div class="field"><label>Logo URL (kosongkan jika upload)</label><input id="p_logo_url" /></div>
+        <div class="field"><label>Upload Logo</label><input type="file" id="p_logo_file" accept="image/*" /></div>
+        <div class="field"><label>Tahun Berdiri</label><input id="p_tahun_berdiri" placeholder="mis. 1980" /></div>
+        <div class="field"><label>Foto Desa (latar hero) — URL</label><input id="p_foto_desa_url" placeholder="https://... atau kosongkan jika upload" /></div>
+        <div class="field"><label>Upload Foto Desa</label><input type="file" id="p_foto_desa_file" accept="image/*" /></div>
+        <div class="field"><label>Visi</label><textarea id="p_visi"></textarea></div>
+        <div class="field"><label>Misi (satu baris per butir)</label><textarea id="p_misi"></textarea></div>
+        <div class="field"><label>Sejarah</label><textarea id="p_sejarah"></textarea></div>
+        <div class="field"><label>Luas Wilayah</label><input id="p_luas_wilayah" /></div>
+        <div class="field"><label>Jumlah Penduduk</label><input id="p_jumlah_penduduk" /></div>
+        <div class="field"><label>Jumlah Kepala Keluarga</label><input id="p_jumlah_kepala_keluarga" /></div>
+        <div class="field"><label>Potensi Desa (pisahkan dengan koma)</label><textarea id="p_potensi"></textarea></div>
+        <div class="field"><label>Alamat Kantor</label><input id="p_alamat_kantor" /></div>
+        <div class="field"><label>Telepon / WA</label><input id="p_telepon" /></div>
+        <div class="field"><label>Email</label><input id="p_email" /></div>
+        <div class="field"><label>Jam Layanan</label><input id="p_jam_layanan" placeholder="mis. Senin - Jumat, 08.00 - 16.00 WIB" /></div>
+        <div class="field"><label>URL Maps (embed)</label><input id="p_maps_url" placeholder="https://www.google.com/maps/embed?pb=..." /></div>
+        <div class="field"><label>Facebook</label><input id="p_facebook" /></div>
+        <div class="field"><label>Instagram</label><input id="p_instagram" /></div>
+        <div class="field"><label>Warna Aksen (hex)</label><input id="p_accent_color" placeholder="#1f7a4d" /></div>
+        <button class="btn" type="submit">Simpan Profil</button>
+      </form>
+    </div>
+
+    <!-- TAB: PERANGKAT -->
+    <div class="tab-panel" id="tab-perangkat">
+      <div class="toolbar">
+        <button class="btn small" id="btn-add-perangkat">+ Tambah Perangkat</button>
+      </div>
+      <table class="table" id="table-perangkat"><tbody></tbody></table>
+
+      <!-- form modal perangkat -->
+      <div id="modal-perangkat" style="display:none">
+        <form id="form-perangkat" style="border:1px solid var(--border);padding:16px;border-radius:12px;margin-top:12px">
+          <input type="hidden" id="per_id" />
+          <div class="field"><label>Nama</label><input id="per_nama" required /></div>
+          <div class="field"><label>Jabatan</label><input id="per_jabatan" required /></div>
+          <div class="field"><label>Periode</label><input id="per_periode" /></div>
+          <div class="field"><label>Foto URL (opsional)</label><input id="per_foto_url" /></div>
+          <div class="field"><label>Upload Foto</label><input type="file" id="per_foto_file" accept="image/*" /></div>
+          <div class="field"><label>Urutan</label><input type="number" id="per_sort" value="0" /></div>
+          <div class="field"><label>Tugas & Fungsi</label><textarea id="per_tugas"></textarea></div>
+          <div class="field" style="display:flex;align-items:center;gap:10px;margin-top:4px">
+            <input type="checkbox" id="per_is_kades" style="width:18px;height:18px" />
+            <label for="per_is_kades" style="margin:0">Kepala Desa (kartu istimewa)</label>
+          </div>
+          <button class="btn" type="submit">Simpan</button>
+          <button class="btn secondary" type="button" id="per-cancel">Batal</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB: UMKM -->
+    <div class="tab-panel" id="tab-umkm">
+      <div class="toolbar"><button class="btn small" id="btn-add-umkm">+ Tambah UMKM</button></div>
+      <table class="table" id="table-umkm"><tbody></tbody></table>
+
+      <div id="modal-umkm" style="display:none">
+        <form id="form-umkm" style="border:1px solid var(--border);padding:16px;border-radius:12px;margin-top:12px">
+          <input type="hidden" id="um_id" />
+          <div class="field"><label>Nama Usaha</label><input id="um_nama" required /></div>
+          <div class="field"><label>Pemilik</label><input id="um_pemilik" /></div>
+          <div class="field"><label>Kategori</label><input id="um_kategori" /></div>
+          <div class="field"><label>Deskripsi</label><textarea id="um_deskripsi"></textarea></div>
+          <div class="field"><label>Kontak (WA)</label><input id="um_kontak" /></div>
+          <div class="field"><label>Alamat</label><input id="um_alamat" /></div>
+          <div class="field"><label>Jam Buka</label><input id="um_jam_buka" placeholder="mis. Setiap hari, 08.00 - 20.00" /></div>
+          <div class="field"><label>URL Maps</label><input id="um_maps_url" /></div>
+          <div class="field"><label>Foto URL (opsional)</label><input id="um_foto_url" /></div>
+          <div class="field"><label>Upload Foto</label><input type="file" id="um_foto_file" accept="image/*" /></div>
+          <div class="field"><label>Urutan</label><input type="number" id="um_sort" value="0" /></div>
+          <button class="btn" type="submit">Simpan</button>
+          <button class="btn secondary" type="button" id="um-cancel">Batal</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB: BERITA -->
+    <div class="tab-panel" id="tab-berita">
+      <div class="toolbar"><button class="btn small" id="btn-add-berita">+ Tambah Berita</button></div>
+      <table class="table" id="table-berita"><tbody></tbody></table>
+
+      <div id="modal-berita" style="display:none">
+        <form id="form-berita" style="border:1px solid var(--border);padding:16px;border-radius:12px;margin-top:12px">
+          <input type="hidden" id="ber_id" />
+          <div class="field"><label>Judul</label><input id="ber_judul" required /></div>
+          <div class="field"><label>Kategori</label><input id="ber_kategori" /></div>
+          <div class="field"><label>Tanggal</label><input type="date" id="ber_tanggal" /></div>
+          <div class="field"><label>Isi</label><textarea id="ber_isi"></textarea></div>
+          <div class="field"><label>Sumber</label><input id="ber_sumber" placeholder="mis. Pemerintah Desa" /></div>
+          <div class="field"><label>Foto URL (opsional)</label><input id="ber_foto_url" /></div>
+          <div class="field"><label>Upload Foto</label><input type="file" id="ber_foto_file" accept="image/*" /></div>
+          <div class="field"><label>Urutan</label><input type="number" id="ber_sort" value="0" /></div>
+          <button class="btn" type="submit">Simpan</button>
+          <button class="btn secondary" type="button" id="ber-cancel">Batal</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB: AGENDA -->
+    <div class="tab-panel" id="tab-agenda">
+      <div class="toolbar"><button class="btn small" id="btn-add-agenda">+ Tambah Agenda</button></div>
+      <table class="table" id="table-agenda"><tbody></tbody></table>
+
+      <div id="modal-agenda" style="display:none">
+        <form id="form-agenda" style="border:1px solid var(--border);padding:16px;border-radius:12px;margin-top:12px">
+          <input type="hidden" id="agn_id" />
+          <div class="field"><label>Judul Kegiatan</label><input id="agn_judul" required /></div>
+          <div class="field"><label>Tanggal</label><input type="date" id="agn_tanggal" required /></div>
+          <div class="field"><label>Waktu</label><input id="agn_waktu" placeholder="mis. 08.00 - 12.00 WIB" /></div>
+          <div class="field"><label>Lokasi</label><input id="agn_lokasi" placeholder="mis. Balai Desa" /></div>
+          <div class="field"><label>Kategori</label><input id="agn_kategori" placeholder="mis. Musyawarah / Festival / Kesehatan" /></div>
+          <div class="field"><label>Deskripsi</label><textarea id="agn_deskripsi"></textarea></div>
+          <button class="btn" type="submit">Simpan</button>
+          <button class="btn secondary" type="button" id="agn-cancel">Batal</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB: DOKUMEN -->
+    <div class="tab-panel" id="tab-dokumen">
+      <div class="toolbar"><button class="btn small" id="btn-add-dokumen">+ Tambah Dokumen</button></div>
+      <table class="table" id="table-dokumen"><tbody></tbody></table>
+
+      <div id="modal-dokumen" style="display:none">
+        <form id="form-dokumen" style="border:1px solid var(--border);padding:16px;border-radius:12px;margin-top:12px">
+          <input type="hidden" id="dok_id" />
+          <div class="field"><label>Judul Dokumen / Form</label><input id="dok_judul" required /></div>
+          <div class="field"><label>Kategori</label><input id="dok_kategori" placeholder="mis. Formulir / Perdes / Laporan" /></div>
+          <div class="field"><label>Deskripsi</label><input id="dok_deskripsi" /></div>
+          <div class="field"><label>URL File Dokumen</label><input id="dok_file_url" required placeholder="https://..." /></div>
+          <div class="field"><label>Ukuran File (Opsional)</label><input id="dok_ukuran" placeholder="mis. 250 KB" /></div>
+          <button class="btn" type="submit">Simpan</button>
+          <button class="btn secondary" type="button" id="dok-cancel">Batal</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB: PENGADUAN WARGA -->
+    <div class="tab-panel" id="tab-pengaduan">
+      <h3 style="margin-bottom:12px;color:var(--accent-dark)">💬 Daftar Pengaduan & Aspirasi Warga</h3>
+      <table class="table" id="table-pengaduan"><tbody></tbody></table>
+
+      <div id="modal-pengaduan" style="display:none">
+        <form id="form-pengaduan-admin" style="border:1px solid var(--border);padding:16px;border-radius:12px;margin-top:12px">
+          <input type="hidden" id="pg_admin_id" />
+          <div class="field"><label>Status Pengaduan</label>
+            <select id="pg_admin_status" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border)">
+              <option value="Pending">Pending (Belum Diproses)</option>
+              <option value="Diproses">Diproses</option>
+              <option value="Selesai">Selesai / Ditindaklanjuti</option>
+            </select>
+          </div>
+          <div class="field"><label>Tanggapan / Catatan Admin</label><textarea id="pg_admin_tanggapan" placeholder="Tuliskan tanggapan atau tindakan yang telah diambil..."></textarea></div>
+          <button class="btn" type="submit">Simpan Tanggapan</button>
+          <button class="btn secondary" type="button" id="pg-admin-cancel">Batal</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB: GALERI -->
+    <div class="tab-panel" id="tab-galeri">
+      <div class="toolbar"><button class="btn small" id="btn-add-galeri">+ Tambah Foto</button></div>
+      <table class="table" id="table-galeri"><tbody></tbody></table>
+
+      <div id="modal-galeri" style="display:none">
+        <form id="form-galeri" style="border:1px solid var(--border);padding:16px;border-radius:12px;margin-top:12px">
+          <input type="hidden" id="gal_id" />
+          <div class="field"><label>Judul</label><input id="gal_judul" required /></div>
+          <div class="field"><label>Kategori</label><input id="gal_kategori" placeholder="mis. Kegiatan / Wisata / Pembangunan" /></div>
+          <div class="field"><label>Tanggal</label><input type="date" id="gal_tanggal" /></div>
+          <div class="field"><label>Deskripsi</label><textarea id="gal_deskripsi"></textarea></div>
+          <div class="field"><label>Foto URL (opsional)</label><input id="gal_foto_url" /></div>
+          <div class="field"><label>Upload Foto</label><input type="file" id="gal_foto_file" accept="image/*" /></div>
+          <div class="field"><label>Urutan</label><input type="number" id="gal_sort" value="0" /></div>
+          <button class="btn" type="submit">Simpan</button>
+          <button class="btn secondary" type="button" id="gal-cancel">Batal</button>
+        </form>
+      </div>
+    </div>
+      </div>
+      </div>
+    </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/js/config.js?v=4"></script>
+  <script src="assets/js/admin.js?v=8"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+# Files to ignore when deploying to Vercel
+node_modules/
+supabase/.temp/
+*.png
+*.docx
+*.log
+*.txt
+debug*.png
+verify*.png
+cb_*.png
+debug_*.png
+generate_laporan.py
+shot.mjs
+shot_cb.mjs
+test_headless.mjs
+verify.mjs
+.git/

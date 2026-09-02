@@ -1,0 +1,11 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 414, height: 896 } });
+await p.goto('http://localhost:8000/', { waitUntil: 'networkidle' });
+await p.waitForTimeout(2500);
+await p.screenshot({ path: 'preview_home.png', fullPage: true });
+await p.click('.menu-card:nth-child(3)');
+await p.waitForTimeout(1500);
+await p.screenshot({ path: 'preview_umkm.png', fullPage: true });
+await b.close();
+console.log('screenshots saved');

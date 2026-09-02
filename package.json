@@ -1,0 +1,16 @@
+{
+  "name": "webinformasidesa",
+  "version": "1.0.0",
+  "description": "Website informasi desa berbasis **HTML/CSS/JS statis** dengan backend **Supabase**. Tampilan awal berupa **grid menu bergambar** (gaya aplikasi top-up). Pengunjung memindai **QR di gapura desa** → membuka website → memilih menu (Profil, Perangkat Desa, UMKM, Berita, Kontak) → melihat isi desa sebelum masuk.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.62.1"
+  }
+}
