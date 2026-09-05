@@ -723,20 +723,22 @@ async function loadDokumen() {
 async function loadPengaduan() {
   const el = document.getElementById("pengaduan-content");
   el.innerHTML = `
-    <div class="form-pengaduan">
-      <h3 style="margin-bottom:14px;color:var(--accent-dark)">📝 Kirim Aspirasi / Pengaduan</h3>
-      <form id="public-pengaduan-form">
-        <div class="field"><label>Nama Lengkap</label><input id="pg_nama" required placeholder="Nama Anda" /></div>
-        <div class="field"><label>No. HP / WA (Opsional)</label><input id="pg_kontak" placeholder="08xxxxxxxxxx" /></div>
-        <div class="field"><label>Subjek / Judul Laporan</label><input id="pg_subjek" required placeholder="mis. Jalan Rusak Dusun 1" /></div>
-        <div class="field"><label>Isi Aspirasi / Pengaduan</label><textarea id="pg_isi" required placeholder="Tuliskan secara jelas detail laporan Anda..." style="height:110px"></textarea></div>
-        <button class="btn full" type="submit" style="margin-top:10px">Kirim Pengaduan</button>
-      </form>
-      <div id="pg-msg" style="margin-top:10px;text-align:center;font-size:13.5px;font-weight:600"></div>
-    </div>
-    <div class="pengaduan-status-box" id="public-pengaduan-list">
-      <h3 style="margin-bottom:12px">📢 Status Laporan Terbaru Warga</h3>
-      <div id="pg-recent-items"><div class="spinner"></div></div>
+    <div class="pengaduan-layout">
+      <div class="form-pengaduan">
+        <h3 style="margin-bottom:14px;color:var(--accent-dark)">📝 Kirim Aspirasi / Pengaduan</h3>
+        <form id="public-pengaduan-form">
+          <div class="field"><label>Nama Lengkap</label><input id="pg_nama" required placeholder="Nama Anda" /></div>
+          <div class="field"><label>No. HP / WA (Opsional)</label><input id="pg_kontak" placeholder="08xxxxxxxxxx" /></div>
+          <div class="field"><label>Subjek / Judul Laporan</label><input id="pg_subjek" required placeholder="mis. Jalan Rusak Dusun 1" /></div>
+          <div class="field"><label>Isi Aspirasi / Pengaduan</label><textarea id="pg_isi" required placeholder="Tuliskan secara jelas detail laporan Anda..." style="height:110px"></textarea></div>
+          <button class="btn full" type="submit" style="margin-top:10px">Kirim Pengaduan</button>
+        </form>
+        <div id="pg-msg" style="margin-top:10px;text-align:center;font-size:13.5px;font-weight:600"></div>
+      </div>
+      <div class="pengaduan-status-box" id="public-pengaduan-list">
+        <h3 style="margin-bottom:12px">📢 Status Laporan Terbaru Warga</h3>
+        <div id="pg-recent-items"><div class="spinner"></div></div>
+      </div>
     </div>
   `;
 
