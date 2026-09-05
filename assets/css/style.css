@@ -44,8 +44,7 @@ body {
     radial-gradient(1100px 560px at 100% -10%, color-mix(in srgb, var(--accent-2) 14%, transparent), transparent 60%),
     radial-gradient(800px 480px at -10% 110%, color-mix(in srgb, var(--gold) 12%, transparent), transparent 55%),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E"),
-    url("../img/bg-desa.png") center center / cover no-repeat fixed,
-    var(--cream);
+    url("../img/bg-desa.png") center center / cover no-repeat fixed var(--cream);
   background-attachment: fixed;
   color: var(--text);
   line-height: 1.55;
