@@ -1181,6 +1181,7 @@ a.gnews-link:hover { transform: translateY(-5px) scale(1.01); }
 }
 .pengaduan-status-box {
   width: 100%;
+  min-height: 200px;
 }
 .pengaduan-card {
   background: var(--cream-2);
