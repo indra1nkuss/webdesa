@@ -530,48 +530,72 @@ function renderUmkmCards() {
 }
 
 // ---------------------------------------------------------------------
-// Berita Terkini (Google News RSS via rss2json — CORS-friendly)
+// Berita Terkini (Antara News RSS via rss2json — dengan foto)
 // ---------------------------------------------------------------------
-const GNEWS_RSS = "https://news.google.com/rss/search?q=desa+indonesia&hl=id-ID&gl=ID&ceid=ID:id";
-const GNEWS_API = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(GNEWS_RSS)}&count=10`;
+// Antara menyertakan gambar di RSS-nya; CORS-friendly via rss2json
+const NEWS_SOURCES = [
+  "https://www.antaranews.com/rss/terkini.xml",
+  "https://news.google.com/rss/search?q=desa+indonesia&hl=id-ID&gl=ID&ceid=ID:id"
+];
+const NEWS_API = (rss) => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=12`;
+
+// Ekstrak gambar dari beragam field RSS
+function extractImg(a) {
+  if (a.thumbnail && a.thumbnail.startsWith("http")) return a.thumbnail;
+  if (a.enclosure && a.enclosure.link && a.enclosure.link.startsWith("http")) return a.enclosure.link;
+  // Cari <img> di dalam content HTML
+  if (a.content) {
+    const m = a.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (m && m[1].startsWith("http")) return m[1];
+  }
+  // Cari URL gambar di description
+  if (a.description) {
+    const m = a.description.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (m && m[1].startsWith("http")) return m[1];
+  }
+  return "";
+}
 
 async function loadBerita() {
   const el = document.getElementById("berita-content");
   el.innerHTML = `<div class="spinner"></div>`;
 
   let items = [];
-  try {
-    const res = await fetch(GNEWS_API);
-    if (!res.ok) throw new Error("Fetch error: " + res.status);
-    const json = await res.json();
-    if (json.status !== "ok") throw new Error("RSS error");
-    items = json.items || [];
-  } catch (err) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">📰</div>Gagal memuat berita terkini.<br><small style="color:var(--muted)">Periksa koneksi internet Anda.</small></div>`;
-    return;
+  for (const rss of NEWS_SOURCES) {
+    try {
+      const res = await fetch(NEWS_API(rss));
+      if (!res.ok) continue;
+      const json = await res.json();
+      if (json.status === "ok" && json.items && json.items.length > 0) {
+        items = json.items;
+        break;
+      }
+    } catch (_) { continue; }
   }
 
   if (items.length === 0) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">📰</div>Tidak ada berita saat ini.</div>`;
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📰</div>Gagal memuat berita terkini.<br><small style="color:var(--muted)">Periksa koneksi internet Anda.</small></div>`;
     return;
   }
 
   const [featured, ...rest] = items;
 
   const renderCard = (a, isFeatured = false) => {
-    // Bersihkan judul dari " - Nama Sumber" di akhir (format Google News)
     const rawTitle = a.title || "(Tanpa Judul)";
     const judul = rawTitle.replace(/\s-\s[^-]+$/, "").trim();
-    const sumber = a.author || (rawTitle.includes(" - ") ? rawTitle.split(" - ").pop().trim() : "");
+    const sumber = a.author || a.feed_url || (rawTitle.includes(" - ") ? rawTitle.split(" - ").pop().trim() : "Antara News");
     const tanggal = a.pubDate ? fmtTanggal(a.pubDate) : "";
-    const desc = a.description ? a.description.replace(/<[^>]*>/g, "").substring(0, 180) : "";
-    const img = a.thumbnail || a.enclosure?.link || "";
+    const rawDesc = a.description ? a.description.replace(/<[^>]*>/g, "").trim() : "";
+    const desc = rawDesc.substring(0, 200);
+    const img = extractImg(a);
     const url = a.link || "#";
 
     if (isFeatured) {
       return `
         <a class="card card-featured gnews-link" href="${esc(url)}" target="_blank" rel="noopener">
-          ${img ? `<img class="thumb" src="${esc(img)}" alt="${esc(judul)}" onerror="this.style.display='none'" />` : `<div class="thumb thumb-ph featured-ph">📰</div>`}
+          ${img
+            ? `<img class="thumb" src="${esc(img)}" alt="${esc(judul)}" onerror="this.outerHTML='<div class=\\'thumb thumb-ph featured-ph\\'>📰</div>'" />`
+            : `<div class="thumb thumb-ph featured-ph">📰</div>`}
           <div class="body">
             <div class="badge-row">
               ${sumber ? `<span class="badge">${esc(sumber)}</span>` : ""}
@@ -586,7 +610,9 @@ async function loadBerita() {
     }
     return `
       <a class="card card-berita gnews-link" href="${esc(url)}" target="_blank" rel="noopener">
-        ${img ? `<img class="thumb" src="${esc(img)}" alt="${esc(judul)}" onerror="this.style.display='none'" />` : `<div class="thumb thumb-ph">📰</div>`}
+        ${img
+          ? `<img class="thumb" src="${esc(img)}" alt="${esc(judul)}" onerror="this.outerHTML='<div class=\\'thumb thumb-ph\\'>📰</div>'" />`
+          : `<div class="thumb thumb-ph">📰</div>`}
         <div class="body">
           ${sumber ? `<span class="badge">${esc(sumber)}</span>` : ""}
           <h3>${esc(judul)}</h3>
@@ -598,7 +624,7 @@ async function loadBerita() {
   };
 
   el.innerHTML = `
-    <div class="gnews-notice">📡 Berita terkini · Diperbarui ${new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB</div>
+    <div class="gnews-notice">📡 Berita terkini dari ANTARA · Diperbarui ${new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB</div>
     ${renderCard(featured, true)}
     <div class="cards">
       ${rest.map(a => renderCard(a)).join("")}
