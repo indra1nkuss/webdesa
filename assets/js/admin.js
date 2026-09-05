@@ -158,7 +158,9 @@ async function loadAgenda() {
 }
 
 document.getElementById("btn-add-agenda").addEventListener("click", () => {
-  ["agn_id","agn_judul","agn_tanggal","agn_waktu","agn_lokasi","agn_kategori","agn_deskripsi"].forEach(i => document.getElementById(i).value = "");
+  ["agn_id","agn_judul","agn_tanggal","agn_waktu","agn_lokasi","agn_kategori","agn_deskripsi","agn_foto_url"].forEach(i => document.getElementById(i).value = "");
+  document.getElementById("agn_foto_file").value = "";
+  const prev = document.getElementById("agn_foto_preview"); prev.src = ""; prev.style.display = "none";
   document.getElementById("modal-agenda").style.display = "block";
 });
 document.getElementById("agn-cancel").addEventListener("click", () => document.getElementById("modal-agenda").style.display = "none");
@@ -173,6 +175,11 @@ window.editAgenda = async (id) => {
   document.getElementById("agn_lokasi").value = data.lokasi || "";
   document.getElementById("agn_kategori").value = data.kategori || "";
   document.getElementById("agn_deskripsi").value = data.deskripsi || "";
+  document.getElementById("agn_foto_url").value = data.foto_url || "";
+  document.getElementById("agn_foto_file").value = "";
+  const prev = document.getElementById("agn_foto_preview");
+  if (data.foto_url) { prev.src = imgUrl(data.foto_url); prev.style.display = "block"; }
+  else { prev.src = ""; prev.style.display = "none"; }
   document.getElementById("modal-agenda").style.display = "block";
 };
 
@@ -185,19 +192,31 @@ window.delAgenda = async (id) => {
 document.getElementById("form-agenda").addEventListener("submit", async (e) => {
   e.preventDefault();
   const id = document.getElementById("agn_id").value;
+  let foto = document.getElementById("agn_foto_url").value.trim();
+  const file = document.getElementById("agn_foto_file").files[0];
+  if (file) { const p = await uploadImage(file, "agenda"); if (p) foto = p; }
   const row = {
     judul: document.getElementById("agn_judul").value,
     tanggal: document.getElementById("agn_tanggal").value,
     waktu: document.getElementById("agn_waktu").value,
     lokasi: document.getElementById("agn_lokasi").value,
     kategori: document.getElementById("agn_kategori").value,
-    deskripsi: document.getElementById("agn_deskripsi").value
+    deskripsi: document.getElementById("agn_deskripsi").value,
+    foto_url: foto || null
   };
   let res;
   if (id) res = await sb.from("agenda").update(row).eq("id", id);
   else res = await sb.from("agenda").insert(row);
   if (res.error) toast("Gagal: " + res.error.message);
   else { toast("Tersimpan ✓"); document.getElementById("modal-agenda").style.display = "none"; loadAgenda(); }
+});
+
+// Preview foto agenda saat dipilih
+document.getElementById("agn_foto_file").addEventListener("change", (e) => {
+  const f = e.target.files[0];
+  const prev = document.getElementById("agn_foto_preview");
+  if (f) { prev.src = URL.createObjectURL(f); prev.style.display = "block"; }
+  else { prev.src = ""; prev.style.display = "none"; }
 });
 
 // ---------------------------------------------------------------------

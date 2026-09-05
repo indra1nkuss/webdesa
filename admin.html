@@ -173,6 +173,12 @@
           <div class="field"><label>Lokasi</label><input id="agn_lokasi" placeholder="mis. Balai Desa" /></div>
           <div class="field"><label>Kategori</label><input id="agn_kategori" placeholder="mis. Musyawarah / Festival / Kesehatan" /></div>
           <div class="field"><label>Deskripsi</label><textarea id="agn_deskripsi"></textarea></div>
+          <div class="field">
+            <label>Foto Kegiatan (opsional)</label>
+            <input type="file" id="agn_foto_file" accept="image/*" />
+            <input type="hidden" id="agn_foto_url" />
+            <img id="agn_foto_preview" src="" alt="Preview" style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:10px;margin-top:8px;" />
+          </div>
           <button class="btn" type="submit">Simpan</button>
           <button class="btn secondary" type="button" id="agn-cancel">Batal</button>
         </form>
@@ -247,6 +253,6 @@
   <div class="toast" id="toast"></div>
 
   <script src="assets/js/config.js?v=4"></script>
-  <script src="assets/js/admin.js?v=9"></script>
+  <script src="assets/js/admin.js?v=10"></script>
 </body>
 </html>

@@ -1077,6 +1077,34 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; }
   margin-bottom: 6px;
   flex-wrap: wrap;
 }
+.agenda-foto {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 12px;
+  margin-top: 10px;
+  border: 1px solid var(--border);
+}
+.agenda-info { flex: 1; }
+
+/* ---- GNews ---- */
+.gnews-notice {
+  font-size: 12px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: 999px;
+  padding: 5px 14px;
+  margin-bottom: 14px;
+  display: inline-block;
+}
+a.gnews-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+a.gnews-link:hover { transform: translateY(-5px) scale(1.01); }
 
 .dokumen-grid {
   display: grid;

@@ -530,102 +530,78 @@ function renderUmkmCards() {
 }
 
 // ---------------------------------------------------------------------
-// Berita & Pengumuman (dengan Filter & Paginasi)
+// Berita Terkini (GNews API)
 // ---------------------------------------------------------------------
-let beritaData = [];
-let beritaKategori = ["Semua"];
-let beritaFilter = "Semua";
+const GNEWS_KEY = "4a276d079cc9f40371bfd0dc70f023f7";
+const GNEWS_URL = `https://gnews.io/api/v4/top-headlines?q=desa+indonesia&lang=id&country=id&max=10&apikey=${GNEWS_KEY}`;
 
 async function loadBerita() {
-  const { data } = await sb.from("berita").select("*").order("tanggal", { ascending: false });
   const el = document.getElementById("berita-content");
-  if (!data || data.length === 0) { el.innerHTML = `<div class="empty">Belum ada berita.</div>`; return; }
+  el.innerHTML = `<div class="spinner"></div>`;
 
-  beritaData = data;
-  beritaKategori = ["Semua", ...Array.from(new Set(data.map(b => b.kategori).filter(Boolean)))];
+  let articles = [];
+  try {
+    const res = await fetch(GNEWS_URL);
+    if (!res.ok) throw new Error("GNews error: " + res.status);
+    const json = await res.json();
+    articles = json.articles || [];
+  } catch (err) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📰</div>Gagal memuat berita. Periksa koneksi internet Anda.<br><small style="color:var(--muted)">${err.message}</small></div>`;
+    return;
+  }
+
+  if (articles.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📰</div>Tidak ada berita saat ini.</div>`;
+    return;
+  }
+
+  const [featured, ...rest] = articles;
+
+  const renderCard = (a, isFeatured = false) => {
+    const img = a.image || "";
+    const judul = a.title || "(Tanpa Judul)";
+    const sumber = a.source?.name || "";
+    const tanggal = a.publishedAt ? fmtTanggal(a.publishedAt) : "";
+    const desc = a.description || "";
+    const url = a.url || "#";
+
+    if (isFeatured) {
+      return `
+        <a class="card card-featured gnews-link" href="${esc(url)}" target="_blank" rel="noopener">
+          ${img ? `<img class="thumb" src="${esc(img)}" alt="${esc(judul)}" onerror="this.parentElement.querySelector('.thumb-ph')&&(this.style.display='none');this.style.display='none';" />` : `<div class="thumb thumb-ph featured-ph">📰</div>`}
+          <div class="body">
+            <div class="badge-row">
+              ${sumber ? `<span class="badge">${esc(sumber)}</span>` : ""}
+              <span class="badge badge-new">Terkini</span>
+            </div>
+            <h3>${esc(judul)}</h3>
+            ${tanggal ? `<div class="meta">📅 ${tanggal}</div>` : ""}
+            ${desc ? `<div class="desc line-clamp-3">${esc(desc)}</div>` : ""}
+            <div class="view-detail">Baca selengkapnya ↗</div>
+          </div>
+        </a>`;
+    }
+    return `
+      <a class="card card-berita gnews-link" href="${esc(url)}" target="_blank" rel="noopener">
+        ${img ? `<img class="thumb" src="${esc(img)}" alt="${esc(judul)}" />` : `<div class="thumb thumb-ph">📰</div>`}
+        <div class="body">
+          ${sumber ? `<span class="badge">${esc(sumber)}</span>` : ""}
+          <h3>${esc(judul)}</h3>
+          ${tanggal ? `<div class="meta">📅 ${tanggal}</div>` : ""}
+          ${desc ? `<div class="desc line-clamp-2">${esc(desc)}</div>` : ""}
+          <div class="view-detail">Baca ↗</div>
+        </div>
+      </a>`;
+  };
 
   el.innerHTML = `
-    <div class="chip-filter-wrap" id="berita-filters"></div>
-    <div id="berita-list-container"></div>
-  `;
+    <div class="gnews-notice">📡 Berita dari sumber terpercaya · <span id="gnews-time"></span></div>
+    ${renderCard(featured, true)}
+    <div class="cards">
+      ${rest.map(a => renderCard(a)).join("")}
+    </div>`;
 
-  renderBeritaFilters();
-  renderBeritaList();
-}
-
-function renderBeritaFilters() {
-  const wrap = document.getElementById("berita-filters");
-  if (!wrap) return;
-  wrap.innerHTML = beritaKategori.map(k => `
-    <button class="chip-filter ${k === beritaFilter ? "active" : ""}" data-kat="${esc(k)}">${esc(k)}</button>
-  `).join("");
-  wrap.querySelectorAll(".chip-filter").forEach(btn => {
-    btn.addEventListener("click", () => {
-      beritaFilter = btn.dataset.kat;
-      renderBeritaFilters();
-      renderBeritaList();
-    });
-  });
-}
-
-function renderBeritaList() {
-  const container = document.getElementById("berita-list-container");
-  if (!container) return;
-  const list = beritaFilter === "Semua" ? beritaData : beritaData.filter(b => b.kategori === beritaFilter);
-  if (list.length === 0) { container.innerHTML = `<div class="empty">Tidak ada berita di kategori ini.</div>`; return; }
-
-  const [featured, ...rest] = list;
-  const featuredImg = featured.foto_url ? imgUrl(featured.foto_url) : "";
-
-  container.innerHTML = `
-    <div class="card card-featured" data-open="${esc(featured.id)}" role="button" tabindex="0">
-      ${featuredImg ? `<img class="thumb" src="${esc(featuredImg)}" alt="${esc(featured.judul)}" />` : `<div class="thumb thumb-ph featured-ph">📰</div>`}
-      <div class="body">
-        <div class="badge-row">
-          ${featured.kategori ? `<span class="badge">${esc(featured.kategori)}</span>` : ""}
-          <span class="badge badge-new">Terbaru</span>
-        </div>
-        <h3>${esc(featured.judul)}</h3>
-        ${featured.tanggal ? `<div class="meta">📅 ${fmtTanggal(featured.tanggal)}</div>` : ""}
-        ${featured.isi ? `<div class="desc line-clamp-3">${esc(featured.isi)}</div>` : ""}
-        <div class="view-detail">Baca selengkapnya →</div>
-      </div>
-    </div>
-    <div class="cards">` + rest.map(b => `
-      <div class="card card-berita" data-open="${esc(b.id)}" role="button" tabindex="0">
-        ${b.foto_url ? `<img class="thumb" src="${esc(imgUrl(b.foto_url))}" alt="${esc(b.judul)}" />` : `<div class="thumb thumb-ph">📰</div>`}
-        <div class="body">
-          ${b.kategori ? `<span class="badge">${esc(b.kategori)}</span>` : ""}
-          <h3>${esc(b.judul)}</h3>
-          ${b.tanggal ? `<div class="meta">📅 ${fmtTanggal(b.tanggal)}</div>` : ""}
-          ${b.isi ? `<div class="desc line-clamp-2">${esc(b.isi)}</div>` : ""}
-          <div class="view-detail">Baca →</div>
-        </div>
-      </div>
-    `).join("") + `</div>`;
-
-  container.querySelectorAll("[data-open]").forEach(card => {
-    const open = (id) => {
-      const b = beritaData.find(x => x.id === id);
-      if (!b) return;
-      openModal(`
-        <div class="modal-head">
-          <div>
-            <div class="badge-row">
-              ${b.kategori ? `<span class="badge">${esc(b.kategori)}</span>` : ""}
-              ${b.tanggal ? `<span class="meta">📅 ${fmtTanggal(b.tanggal)}</span>` : ""}
-            </div>
-            <h3>${esc(b.judul)}</h3>
-          </div>
-        </div>
-        ${b.foto_url ? `<img class="modal-cover" src="${esc(imgUrl(b.foto_url))}" alt="${esc(b.judul)}" />` : ""}
-        ${b.sumber ? `<div class="meta">✍️ Sumber: ${esc(b.sumber)}</div>` : ""}
-        ${b.isi ? `<div class="modal-block modal-article">${toParagraf(b.isi)}</div>` : ""}
-      `);
-    };
-    card.addEventListener("click", () => open(card.dataset.open));
-    card.addEventListener("keydown", (e) => { if (e.key === "Enter") open(card.dataset.open); });
-  });
+  document.getElementById("gnews-time").textContent = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB";
 }
 
 // ---------------------------------------------------------------------
@@ -648,6 +624,7 @@ async function loadAgenda() {
     const d = new Date(a.tanggal || Date.now());
     const day = isNaN(d.getTime()) ? "1" : d.getDate();
     const month = isNaN(d.getTime()) ? "Bbl" : d.toLocaleDateString("id-ID", { month: "short" });
+    const fotoUrl = a.foto_url ? imgUrl(a.foto_url) : "";
     return `
       <div class="agenda-card">
         <div class="agenda-date-box">
@@ -662,6 +639,7 @@ async function loadAgenda() {
             ${a.lokasi ? `<span>📍 ${esc(a.lokasi)}</span>` : ""}
           </div>
           ${a.deskripsi ? `<p style="font-size:13.5px;color:var(--text);margin-top:4px">${esc(a.deskripsi)}</p>` : ""}
+          ${fotoUrl ? `<img class="agenda-foto" src="${esc(fotoUrl)}" alt="${esc(a.judul)}" loading="lazy" />` : ""}
         </div>
       </div>
     `;
