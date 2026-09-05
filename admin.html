@@ -39,7 +39,6 @@
           <div class="nav-item active" data-tab="profil">🏡 Profil Desa</div>
           <div class="nav-item" data-tab="perangkat">👥 Perangkat</div>
           <div class="nav-item" data-tab="umkm">🛍️ UMKM</div>
-          <div class="nav-item" data-tab="berita">📰 Berita</div>
           <div class="nav-item" data-tab="agenda">📅 Agenda</div>
           <div class="nav-item" data-tab="dokumen">📄 Dokumen</div>
           <div class="nav-item" data-tab="pengaduan">💬 Pengaduan</div>
@@ -137,27 +136,6 @@
       </div>
     </div>
 
-    <!-- TAB: BERITA -->
-    <div class="tab-panel" id="tab-berita">
-      <div class="toolbar"><button class="btn small" id="btn-add-berita">+ Tambah Berita</button></div>
-      <table class="table" id="table-berita"><tbody></tbody></table>
-
-      <div id="modal-berita" style="display:none">
-        <form id="form-berita" style="border:1px solid var(--border);padding:16px;border-radius:12px;margin-top:12px">
-          <input type="hidden" id="ber_id" />
-          <div class="field"><label>Judul</label><input id="ber_judul" required /></div>
-          <div class="field"><label>Kategori</label><input id="ber_kategori" /></div>
-          <div class="field"><label>Tanggal</label><input type="date" id="ber_tanggal" /></div>
-          <div class="field"><label>Isi</label><textarea id="ber_isi"></textarea></div>
-          <div class="field"><label>Sumber</label><input id="ber_sumber" placeholder="mis. Pemerintah Desa" /></div>
-          <div class="field"><label>Foto URL (opsional)</label><input id="ber_foto_url" /></div>
-          <div class="field"><label>Upload Foto</label><input type="file" id="ber_foto_file" accept="image/*" /></div>
-          <div class="field"><label>Urutan</label><input type="number" id="ber_sort" value="0" /></div>
-          <button class="btn" type="submit">Simpan</button>
-          <button class="btn secondary" type="button" id="ber-cancel">Batal</button>
-        </form>
-      </div>
-    </div>
 
     <!-- TAB: AGENDA -->
     <div class="tab-panel" id="tab-agenda">
@@ -253,6 +231,6 @@
   <div class="toast" id="toast"></div>
 
   <script src="assets/js/config.js?v=4"></script>
-  <script src="assets/js/admin.js?v=10"></script>
+  <script src="assets/js/admin.js?v=11"></script>
 </body>
 </html>

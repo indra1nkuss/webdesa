@@ -530,45 +530,48 @@ function renderUmkmCards() {
 }
 
 // ---------------------------------------------------------------------
-// Berita Terkini (GNews API)
+// Berita Terkini (Google News RSS via rss2json — CORS-friendly)
 // ---------------------------------------------------------------------
-const GNEWS_KEY = "4a276d079cc9f40371bfd0dc70f023f7";
-const GNEWS_URL = `https://gnews.io/api/v4/top-headlines?q=desa+indonesia&lang=id&country=id&max=10&apikey=${GNEWS_KEY}`;
+const GNEWS_RSS = "https://news.google.com/rss/search?q=desa+indonesia&hl=id-ID&gl=ID&ceid=ID:id";
+const GNEWS_API = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(GNEWS_RSS)}&count=10`;
 
 async function loadBerita() {
   const el = document.getElementById("berita-content");
   el.innerHTML = `<div class="spinner"></div>`;
 
-  let articles = [];
+  let items = [];
   try {
-    const res = await fetch(GNEWS_URL);
-    if (!res.ok) throw new Error("GNews error: " + res.status);
+    const res = await fetch(GNEWS_API);
+    if (!res.ok) throw new Error("Fetch error: " + res.status);
     const json = await res.json();
-    articles = json.articles || [];
+    if (json.status !== "ok") throw new Error("RSS error");
+    items = json.items || [];
   } catch (err) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">📰</div>Gagal memuat berita. Periksa koneksi internet Anda.<br><small style="color:var(--muted)">${err.message}</small></div>`;
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📰</div>Gagal memuat berita terkini.<br><small style="color:var(--muted)">Periksa koneksi internet Anda.</small></div>`;
     return;
   }
 
-  if (articles.length === 0) {
+  if (items.length === 0) {
     el.innerHTML = `<div class="empty"><div class="empty-icon">📰</div>Tidak ada berita saat ini.</div>`;
     return;
   }
 
-  const [featured, ...rest] = articles;
+  const [featured, ...rest] = items;
 
   const renderCard = (a, isFeatured = false) => {
-    const img = a.image || "";
-    const judul = a.title || "(Tanpa Judul)";
-    const sumber = a.source?.name || "";
-    const tanggal = a.publishedAt ? fmtTanggal(a.publishedAt) : "";
-    const desc = a.description || "";
-    const url = a.url || "#";
+    // Bersihkan judul dari " - Nama Sumber" di akhir (format Google News)
+    const rawTitle = a.title || "(Tanpa Judul)";
+    const judul = rawTitle.replace(/\s-\s[^-]+$/, "").trim();
+    const sumber = a.author || (rawTitle.includes(" - ") ? rawTitle.split(" - ").pop().trim() : "");
+    const tanggal = a.pubDate ? fmtTanggal(a.pubDate) : "";
+    const desc = a.description ? a.description.replace(/<[^>]*>/g, "").substring(0, 180) : "";
+    const img = a.thumbnail || a.enclosure?.link || "";
+    const url = a.link || "#";
 
     if (isFeatured) {
       return `
         <a class="card card-featured gnews-link" href="${esc(url)}" target="_blank" rel="noopener">
-          ${img ? `<img class="thumb" src="${esc(img)}" alt="${esc(judul)}" onerror="this.parentElement.querySelector('.thumb-ph')&&(this.style.display='none');this.style.display='none';" />` : `<div class="thumb thumb-ph featured-ph">📰</div>`}
+          ${img ? `<img class="thumb" src="${esc(img)}" alt="${esc(judul)}" onerror="this.style.display='none'" />` : `<div class="thumb thumb-ph featured-ph">📰</div>`}
           <div class="body">
             <div class="badge-row">
               ${sumber ? `<span class="badge">${esc(sumber)}</span>` : ""}
@@ -583,7 +586,7 @@ async function loadBerita() {
     }
     return `
       <a class="card card-berita gnews-link" href="${esc(url)}" target="_blank" rel="noopener">
-        ${img ? `<img class="thumb" src="${esc(img)}" alt="${esc(judul)}" />` : `<div class="thumb thumb-ph">📰</div>`}
+        ${img ? `<img class="thumb" src="${esc(img)}" alt="${esc(judul)}" onerror="this.style.display='none'" />` : `<div class="thumb thumb-ph">📰</div>`}
         <div class="body">
           ${sumber ? `<span class="badge">${esc(sumber)}</span>` : ""}
           <h3>${esc(judul)}</h3>
@@ -595,13 +598,11 @@ async function loadBerita() {
   };
 
   el.innerHTML = `
-    <div class="gnews-notice">📡 Berita dari sumber terpercaya · <span id="gnews-time"></span></div>
+    <div class="gnews-notice">📡 Berita terkini · Diperbarui ${new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB</div>
     ${renderCard(featured, true)}
     <div class="cards">
       ${rest.map(a => renderCard(a)).join("")}
     </div>`;
-
-  document.getElementById("gnews-time").textContent = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB";
 }
 
 // ---------------------------------------------------------------------

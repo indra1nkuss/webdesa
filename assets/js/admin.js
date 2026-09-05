@@ -92,7 +92,6 @@ function showDash() {
   loadProfilForm();
   loadPerangkat();
   loadUmkm();
-  loadBerita();
   loadAgenda();
   loadDokumen();
   loadPengaduan();
@@ -107,7 +106,6 @@ function bindTabs() {
     profil: "Profil Desa",
     perangkat: "Perangkat Desa",
     umkm: "UMKM Desa",
-    berita: "Berita & Pengumuman",
     agenda: "Agenda Desa",
     dokumen: "Dokumen & Surat",
     pengaduan: "Pengaduan Warga",
@@ -546,73 +544,6 @@ document.getElementById("form-umkm").addEventListener("submit", async (e) => {
   else res = await sb.from("umkm").insert(row);
   if (res.error) toast("Gagal: " + res.error.message);
   else { toast("Tersimpan ✓"); document.getElementById("modal-umkm").style.display = "none"; loadUmkm(); }
-});
-
-// ---------------------------------------------------------------------
-// BERITA
-// ---------------------------------------------------------------------
-async function loadBerita() {
-  const { data } = await sb.from("berita").select("*").order("tanggal", { ascending: false });
-  const tb = document.querySelector("#table-berita tbody");
-  if (!data || data.length === 0) { tb.innerHTML = `<tr><td class="empty">Belum ada data</td></tr>`; return; }
-  tb.innerHTML = data.map(b => `
-    <tr>
-      <td>${b.foto_url ? `<img src="${esc(imgUrl(b.foto_url))}" />` : "📰"}</td>
-      <td><b>${esc(b.judul)}</b><br><span style="color:var(--muted)">${esc(b.kategori || "")} · ${esc(b.tanggal || "")}</span></td>
-      <td>
-        <button class="btn small" onclick="editBerita('${esc(b.id)}')">Edit</button>
-        <button class="btn danger small" onclick="delBerita('${esc(b.id)}')">Hapus</button>
-      </td>
-    </tr>`).join("");
-}
-
-document.getElementById("btn-add-berita").addEventListener("click", () => {
-  ["ber_id","ber_judul","ber_kategori","ber_tanggal","ber_isi","ber_sumber","ber_foto_url","ber_sort"].forEach(i => document.getElementById(i).value = "");
-  document.getElementById("ber_foto_file").value = "";
-  document.getElementById("modal-berita").style.display = "block";
-});
-document.getElementById("ber-cancel").addEventListener("click", () => document.getElementById("modal-berita").style.display = "none");
-
-window.editBerita = async (id) => {
-  const { data } = await sb.from("berita").select("*").eq("id", id).single();
-  if (!data) return;
-  document.getElementById("ber_id").value = data.id;
-  document.getElementById("ber_judul").value = data.judul || "";
-  document.getElementById("ber_kategori").value = data.kategori || "";
-  document.getElementById("ber_tanggal").value = data.tanggal || "";
-  document.getElementById("ber_isi").value = data.isi || "";
-  document.getElementById("ber_sumber").value = data.sumber || "";
-  document.getElementById("ber_foto_url").value = data.foto_url || "";
-  document.getElementById("ber_sort").value = data.sort_order || 0;
-  document.getElementById("modal-berita").style.display = "block";
-};
-
-window.delBerita = async (id) => {
-  if (!confirm("Hapus berita ini?")) return;
-  const { error } = await sb.from("berita").delete().eq("id", id);
-  if (error) toast("Gagal: " + error.message); else { toast("Terhapus ✓"); loadBerita(); }
-};
-
-document.getElementById("form-berita").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  let foto = document.getElementById("ber_foto_url").value.trim();
-  const file = document.getElementById("ber_foto_file").files[0];
-  if (file) { const p = await uploadImage(file, "berita"); if (p) foto = p; }
-  const id = document.getElementById("ber_id").value;
-  const row = {
-    judul: document.getElementById("ber_judul").value,
-    kategori: document.getElementById("ber_kategori").value,
-    tanggal: document.getElementById("ber_tanggal").value,
-    isi: document.getElementById("ber_isi").value,
-    sumber: document.getElementById("ber_sumber").value,
-    foto_url: foto || null,
-    sort_order: parseInt(document.getElementById("ber_sort").value) || 0
-  };
-  let res;
-  if (id) res = await sb.from("berita").update(row).eq("id", id);
-  else res = await sb.from("berita").insert(row);
-  if (res.error) toast("Gagal: " + res.error.message);
-  else { toast("Tersimpan ✓"); document.getElementById("modal-berita").style.display = "none"; loadBerita(); }
 });
 
 // ---------------------------------------------------------------------
