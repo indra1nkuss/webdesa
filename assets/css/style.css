@@ -1166,9 +1166,10 @@ a.gnews-link:hover { transform: translateY(-5px) scale(1.01); }
 }
 
 .pengaduan-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-bottom: 40px; /* ensure mobile nav doesn't cover it */
 }
 .form-pengaduan {
   background: var(--card);
@@ -1176,9 +1177,10 @@ a.gnews-link:hover { transform: translateY(-5px) scale(1.01); }
   border-radius: var(--radius);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
+  width: 100%;
 }
 .pengaduan-status-box {
-  /* removed margin-top, handled by grid gap */
+  width: 100%;
 }
 .pengaduan-card {
   background: var(--cream-2);
@@ -1298,7 +1300,7 @@ a.gnews-link:hover { transform: translateY(-5px) scale(1.01); }
   .card-featured .thumb, .card-featured .thumb-ph { height: 100%; min-height: 220px; }
   .card-featured .body { padding: 24px; }
   
-  .pengaduan-layout { grid-template-columns: 1fr 1fr; align-items: start; }
+  .pengaduan-layout { flex-direction: row; align-items: flex-start; }
 
   /* Admin: sidebar vertikal */
   .dashboard { grid-template-columns: 250px 1fr; }
