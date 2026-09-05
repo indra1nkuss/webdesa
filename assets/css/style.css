@@ -676,10 +676,21 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; }
 .card-person { cursor: pointer; }
 .card-person .body { text-align: center; padding: 18px 14px; }
 .avatar-lg {
-  width: 84px; height: 84px; border-radius: 50%;
-  object-fit: cover; margin: 0 auto 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 38px; background: var(--cream-2); border: 2px solid color-mix(in srgb, var(--gold) 50%, var(--border));
+  width: 100px;
+  height: 120px;
+  border-radius: 14px;
+  object-fit: cover;
+  object-position: top center;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  background: var(--cream-2);
+  border: 2px solid color-mix(in srgb, var(--gold) 50%, var(--border));
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  overflow: hidden;
+  flex-shrink: 0;
 }
 .card-kades {
   display: flex; align-items: center; gap: 18px;
@@ -691,11 +702,23 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; }
   transition: transform 0.2s ease;
 }
 .card-kades:hover { transform: translateY(-3px); }
+.kades-avatar {
+  flex-shrink: 0;
+}
 .kades-avatar img, .kades-avatar .avatar {
-  width: 92px; height: 92px; border-radius: 50%;
-  object-fit: cover; border: 3px solid rgba(233, 196, 106, 0.75);
-  background: rgba(255, 255, 255, 0.14); flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: 42px;
+  width: 110px;
+  height: 130px;
+  border-radius: 14px;
+  object-fit: cover;
+  object-position: top center;
+  border: 3px solid rgba(233, 196, 106, 0.75);
+  background: rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+  overflow: hidden;
 }
 .card-kades .badge {
   background: linear-gradient(135deg, var(--gold-soft), var(--gold));
@@ -803,9 +826,18 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 600; }
   font-size: 52px; background: var(--cream-2);
 }
 .modal-avatar {
-  width: 92px; height: 92px; border-radius: 50%; object-fit: cover;
-  display: flex; align-items: center; justify-content: center; font-size: 42px;
-  background: var(--cream-2); border: 3px solid color-mix(in srgb, var(--gold) 55%, var(--border));
+  width: 110px;
+  height: 130px;
+  border-radius: 16px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  margin: 0 auto 12px;
+  font-size: 42px;
+  background: var(--cream-2);
+  border: 3px solid color-mix(in srgb, var(--gold) 55%, var(--border));
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  overflow: hidden;
 }
 .modal-block { margin-top: 12px; }
 .modal-block h4 { font-size: 14px; font-weight: 700; color: var(--accent-dark); margin-bottom: 6px; font-family: var(--font-display); }
