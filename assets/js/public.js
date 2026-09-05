@@ -530,31 +530,53 @@ function renderUmkmCards() {
 }
 
 // ---------------------------------------------------------------------
-// Berita Terkini (Antara News RSS via rss2json — dengan foto)
+// Berita Terkini — Direct RSS XML parsing via AllOrigins CORS proxy
 // ---------------------------------------------------------------------
-// Sumber berita RSS Indonesia yang telah terverifikasi + mendukung gambar
-const NEWS_SOURCES = [
-  "https://feeds.bbci.co.uk/indonesian/rss.xml",         // BBC Indonesia - andal, ada foto
-  "https://www.republika.co.id/rss/nasional",             // Republika
-  "https://www.jpnn.com/rss/nasional",                   // JPNN Nasional
+const NEWS_FEEDS = [
+  "https://feeds.bbci.co.uk/indonesian/rss.xml",   // BBC Indonesia
+  "https://www.cnnindonesia.com/rss",               // CNN Indonesia
 ];
-const NEWS_API = (rss) => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=12`;
+const CORS_PROXY = "https://api.allorigins.win/raw?url=";
 
-// Ekstrak gambar dari beragam field RSS
-function extractImg(a) {
-  if (a.thumbnail && a.thumbnail.startsWith("http")) return a.thumbnail;
-  if (a.enclosure && a.enclosure.link && a.enclosure.link.startsWith("http")) return a.enclosure.link;
-  // Cari <img> di dalam content HTML
-  if (a.content) {
-    const m = a.content.match(/<img[^>]+src=["']([^"']+)["']/i);
-    if (m && m[1].startsWith("http")) return m[1];
-  }
-  // Cari URL gambar di description
-  if (a.description) {
-    const m = a.description.match(/<img[^>]+src=["']([^"']+)["']/i);
-    if (m && m[1].startsWith("http")) return m[1];
-  }
-  return "";
+// Parse RSS XML teks → array item dengan gambar
+function parseRSS(xmlText) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xmlText, "text/xml");
+  const items = Array.from(doc.querySelectorAll("item")).slice(0, 12);
+
+  return items.map(item => {
+    const txt = (tag) => item.querySelector(tag)?.textContent?.trim() || "";
+
+    const title = txt("title");
+    // Link bisa berupa teks atau atribut href
+    let link = txt("link");
+    if (!link) link = item.querySelector("link")?.getAttribute("href") || "#";
+
+    const description = txt("description").replace(/<[^>]*>/g, "").trim();
+    const pubDate = txt("pubDate");
+    const author = txt("author") || txt("creator") || "";
+
+    // Cari gambar: media:content → media:thumbnail → enclosure → img di desc
+    let img = "";
+    const mc = item.getElementsByTagNameNS("http://search.yahoo.com/mrss/", "content")[0]
+            || item.getElementsByTagNameNS("http://search.yahoo.com/mrss/", "thumbnail")[0];
+    if (mc) img = mc.getAttribute("url") || "";
+
+    if (!img) {
+      const enc = item.querySelector("enclosure");
+      if (enc && (enc.getAttribute("type") || "").startsWith("image")) {
+        img = enc.getAttribute("url") || "";
+      }
+    }
+
+    if (!img) {
+      const rawDesc = item.querySelector("description")?.textContent || "";
+      const m = rawDesc.match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (m) img = m[1];
+    }
+
+    return { title, link, description, pubDate, author, img };
+  }).filter(a => a.title);
 }
 
 async function loadBerita() {
@@ -562,15 +584,13 @@ async function loadBerita() {
   el.innerHTML = `<div class="spinner"></div>`;
 
   let items = [];
-  for (const rss of NEWS_SOURCES) {
+  for (const feed of NEWS_FEEDS) {
     try {
-      const res = await fetch(NEWS_API(rss));
+      const res = await fetch(CORS_PROXY + encodeURIComponent(feed), { cache: "no-store" });
       if (!res.ok) continue;
-      const json = await res.json();
-      if (json.status === "ok" && json.items && json.items.length > 0) {
-        items = json.items;
-        break;
-      }
+      const xml = await res.text();
+      const parsed = parseRSS(xml);
+      if (parsed.length > 0) { items = parsed; break; }
     } catch (_) { continue; }
   }
 
@@ -584,11 +604,10 @@ async function loadBerita() {
   const renderCard = (a, isFeatured = false) => {
     const rawTitle = a.title || "(Tanpa Judul)";
     const judul = rawTitle.replace(/\s-\s[^-]+$/, "").trim();
-    const sumber = a.author || a.feed_url || (rawTitle.includes(" - ") ? rawTitle.split(" - ").pop().trim() : "Antara News");
+    const sumber = a.author || "";
     const tanggal = a.pubDate ? fmtTanggal(a.pubDate) : "";
-    const rawDesc = a.description ? a.description.replace(/<[^>]*>/g, "").trim() : "";
-    const desc = rawDesc.substring(0, 200);
-    const img = extractImg(a);
+    const desc = (a.description || "").substring(0, 200);
+    const img = a.img || "";
     const url = a.link || "#";
 
     if (isFeatured) {
