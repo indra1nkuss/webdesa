@@ -1,7 +1,6 @@
 # Files to ignore when deploying to Vercel
 node_modules/
 supabase/.temp/
-*.png
 *.docx
 *.log
 *.txt
