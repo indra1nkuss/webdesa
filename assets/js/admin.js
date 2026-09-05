@@ -421,7 +421,7 @@ window.editPerangkat = async (id) => {
   document.getElementById("per_nama").value = data.nama || "";
   document.getElementById("per_jabatan").value = data.jabatan || "";
   document.getElementById("per_periode").value = data.periode || "";
-  document.getElementById("per_foto_url").value = data.foto_url && data.foto_url.startsWith("http") ? data.foto_url : "";
+  document.getElementById("per_foto_url").value = data.foto_url || "";
   document.getElementById("per_sort").value = data.sort_order || 0;
   document.getElementById("per_tugas").value = data.tugas || "";
   document.getElementById("per_is_kades").checked = !!data.is_kades;
@@ -493,7 +493,7 @@ window.editUmkm = async (id) => {
   document.getElementById("um_alamat").value = data.alamat || "";
   document.getElementById("um_jam_buka").value = data.jam_buka || "";
   document.getElementById("um_maps_url").value = data.maps_url || "";
-  document.getElementById("um_foto_url").value = data.foto_url && data.foto_url.startsWith("http") ? data.foto_url : "";
+  document.getElementById("um_foto_url").value = data.foto_url || "";
   document.getElementById("um_sort").value = data.sort_order || 0;
   document.getElementById("modal-umkm").style.display = "block";
 };
@@ -563,7 +563,7 @@ window.editBerita = async (id) => {
   document.getElementById("ber_tanggal").value = data.tanggal || "";
   document.getElementById("ber_isi").value = data.isi || "";
   document.getElementById("ber_sumber").value = data.sumber || "";
-  document.getElementById("ber_foto_url").value = data.foto_url && data.foto_url.startsWith("http") ? data.foto_url : "";
+  document.getElementById("ber_foto_url").value = data.foto_url || "";
   document.getElementById("ber_sort").value = data.sort_order || 0;
   document.getElementById("modal-berita").style.display = "block";
 };
@@ -637,7 +637,7 @@ window.editGaleri = async (id) => {
   document.getElementById("gal_kategori").value = data.kategori || "";
   document.getElementById("gal_tanggal").value = data.tanggal || "";
   document.getElementById("gal_deskripsi").value = data.deskripsi || "";
-  document.getElementById("gal_foto_url").value = data.foto_url && data.foto_url.startsWith("http") ? data.foto_url : "";
+  document.getElementById("gal_foto_url").value = data.foto_url || "";
   document.getElementById("gal_sort").value = data.sort_order || 0;
   document.getElementById("modal-galeri").style.display = "block";
 };
