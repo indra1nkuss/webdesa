@@ -505,13 +505,13 @@ function renderUmkmCards() {
       const maps = u.maps_url && u.maps_url.startsWith("http") ? u.maps_url : "";
       openModal(`
         <div class="modal-head">
-          ${u.foto_url ? `<img class="modal-cover" src="${esc(imgUrl(u.foto_url))}" alt="${esc(u.nama)}" />` : `<div class="modal-cover ph">🛍️</div>`}
           <div>
             ${u.kategori ? `<span class="badge">${esc(u.kategori)}</span>` : ""}
             <h3>${esc(u.nama)}</h3>
             ${u.pemilik ? `<div class="meta">Pemilik: ${esc(u.pemilik)}</div>` : ""}
           </div>
         </div>
+        ${u.foto_url ? `<img class="modal-cover" src="${esc(imgUrl(u.foto_url))}" alt="${esc(u.nama)}" />` : `<div class="modal-cover ph">🛍️</div>`}
         ${u.deskripsi ? `<div class="modal-block"><p class="modal-par">${esc(u.deskripsi)}</p></div>` : ""}
         <div class="modal-info">
           ${u.alamat ? `<div class="row"><span class="ic">📍</span><span>${esc(u.alamat)}</span></div>` : ""}
@@ -610,7 +610,6 @@ function renderBeritaList() {
       if (!b) return;
       openModal(`
         <div class="modal-head">
-          ${b.foto_url ? `<img class="modal-cover" src="${esc(imgUrl(b.foto_url))}" alt="${esc(b.judul)}" />` : ""}
           <div>
             <div class="badge-row">
               ${b.kategori ? `<span class="badge">${esc(b.kategori)}</span>` : ""}
@@ -619,6 +618,7 @@ function renderBeritaList() {
             <h3>${esc(b.judul)}</h3>
           </div>
         </div>
+        ${b.foto_url ? `<img class="modal-cover" src="${esc(imgUrl(b.foto_url))}" alt="${esc(b.judul)}" />` : ""}
         ${b.sumber ? `<div class="meta">✍️ Sumber: ${esc(b.sumber)}</div>` : ""}
         ${b.isi ? `<div class="modal-block modal-article">${toParagraf(b.isi)}</div>` : ""}
       `);
