@@ -532,10 +532,11 @@ function renderUmkmCards() {
 // ---------------------------------------------------------------------
 // Berita Terkini (Antara News RSS via rss2json — dengan foto)
 // ---------------------------------------------------------------------
-// Antara menyertakan gambar di RSS-nya; CORS-friendly via rss2json
+// Sumber berita RSS Indonesia yang telah terverifikasi + mendukung gambar
 const NEWS_SOURCES = [
-  "https://www.antaranews.com/rss/terkini.xml",
-  "https://news.google.com/rss/search?q=desa+indonesia&hl=id-ID&gl=ID&ceid=ID:id"
+  "https://feeds.bbci.co.uk/indonesian/rss.xml",         // BBC Indonesia - andal, ada foto
+  "https://www.republika.co.id/rss/nasional",             // Republika
+  "https://www.jpnn.com/rss/nasional",                   // JPNN Nasional
 ];
 const NEWS_API = (rss) => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=12`;
 
@@ -624,7 +625,7 @@ async function loadBerita() {
   };
 
   el.innerHTML = `
-    <div class="gnews-notice">📡 Berita terkini dari ANTARA · Diperbarui ${new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB</div>
+    <div class="gnews-notice">📡 Berita Nasional Terkini · Diperbarui ${new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB</div>
     ${renderCard(featured, true)}
     <div class="cards">
       ${rest.map(a => renderCard(a)).join("")}
