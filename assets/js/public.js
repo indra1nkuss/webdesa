@@ -530,13 +530,8 @@ function renderUmkmCards() {
 }
 
 // ---------------------------------------------------------------------
-// Berita Terkini — Direct RSS XML parsing via AllOrigins CORS proxy
+// Berita Terkini — via /api/news (Vercel Serverless, same-origin, no CORS)
 // ---------------------------------------------------------------------
-const NEWS_FEEDS = [
-  "https://feeds.bbci.co.uk/indonesian/rss.xml",   // BBC Indonesia
-  "https://www.cnnindonesia.com/rss",               // CNN Indonesia
-];
-const CORS_PROXY = "https://api.allorigins.win/raw?url=";
 
 // Parse RSS XML teks → array item dengan gambar
 function parseRSS(xmlText) {
@@ -584,15 +579,13 @@ async function loadBerita() {
   el.innerHTML = `<div class="spinner"></div>`;
 
   let items = [];
-  for (const feed of NEWS_FEEDS) {
-    try {
-      const res = await fetch(CORS_PROXY + encodeURIComponent(feed), { cache: "no-store" });
-      if (!res.ok) continue;
+  try {
+    const res = await fetch("/api/news", { cache: "no-store" });
+    if (res.ok) {
       const xml = await res.text();
-      const parsed = parseRSS(xml);
-      if (parsed.length > 0) { items = parsed; break; }
-    } catch (_) { continue; }
-  }
+      items = parseRSS(xml);
+    }
+  } catch (_) {}
 
   if (items.length === 0) {
     el.innerHTML = `<div class="empty"><div class="empty-icon">📰</div>Gagal memuat berita terkini.<br><small style="color:var(--muted)">Periksa koneksi internet Anda.</small></div>`;
