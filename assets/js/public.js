@@ -182,27 +182,33 @@ async function loadMenuCounts() {
 }
 
 // ---------------------------------------------------------------------
-// STATUS OPERASIONAL KANTOR (Real-time)
+// STATUS OPERASIONAL KANTOR (Real-time WIB)
 // ---------------------------------------------------------------------
-function updateOfficeStatus(jamLayananStr) {
+function updateOfficeStatus() {
   const badge = document.getElementById("office-status-badge");
   if (!badge) return;
-  if (!jamLayananStr) {
-    badge.className = "status-badge open";
-    badge.textContent = "🟢 Layanan Buka";
-    return;
-  }
+
+  // Waktu saat ini diubah ke WIB (GMT+7)
   const now = new Date();
-  const day = now.getDay(); // 0 = Minggu, 1 = Senin, ... 6 = Sabtu
-  const hour = now.getHours();
-  const minute = now.getMinutes();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const wib = new Date(utc + (3600000 * 7));
+  
+  const day = wib.getDay(); // 0 = Minggu, 1 = Senin, ... 6 = Sabtu
+  const hour = wib.getHours();
+  const minute = wib.getMinutes();
   const nowMinutes = hour * 60 + minute;
 
-  // Standar: Senin-Jumat (1-5), 08:00 (480) - 16:00 (960)
-  const isWeekday = day >= 1 && day <= 5;
-  const isOpenHours = nowMinutes >= 8 * 60 && nowMinutes < 16 * 60;
+  // Senin - Jumat (1-5): 08:00 - 16:00
+  // Sabtu (6): 08:00 - 12:00
+  // Minggu (0): Libur
+  let isOpen = false;
+  if (day >= 1 && day <= 5) {
+    if (nowMinutes >= 8 * 60 && nowMinutes < 16 * 60) isOpen = true;
+  } else if (day === 6) {
+    if (nowMinutes >= 8 * 60 && nowMinutes < 12 * 60) isOpen = true;
+  }
 
-  if (isWeekday && isOpenHours) {
+  if (isOpen) {
     badge.className = "status-badge open";
     badge.textContent = "🟢 Kantor Buka";
   } else {
@@ -371,9 +377,9 @@ async function loadProfil() {
       <p>${esc(data.alamat_kantor)}</p>
     </div>` : ""}
 
-    ${data.maps_url ? `<div class="profil-block">
+    ${mapsSrc ? `<div class="profil-block">
       <h3>🗺️ Lokasi Desa</h3>
-      <iframe class="map-frame" src="${esc(data.maps_url)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <iframe class="map-frame" src="${mapsSrc}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>` : ""}
   `;
 }
@@ -502,7 +508,13 @@ function renderUmkmCards() {
       const u = umkmData.find(x => x.id === id);
       if (!u) return;
       const wa = u.kontak ? `https://wa.me/${esc(u.kontak.replace(/[^0-9]/g, ""))}` : "";
-      const maps = u.maps_url && u.maps_url.startsWith("http") ? u.maps_url : "";
+      let maps = u.maps_url || "";
+      if (maps.includes("<iframe") && maps.includes("src=")) {
+        const match = maps.match(/src=["'](.*?)["']/);
+        if (match && match[1]) maps = match[1];
+      }
+      maps = maps.startsWith("http") ? maps : "";
+      
       openModal(`
         <div class="modal-head">
           <div>
