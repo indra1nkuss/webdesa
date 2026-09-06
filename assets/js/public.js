@@ -342,6 +342,12 @@ async function loadProfil() {
   const visi = data.visi, misi = data.misi;
   const potensi = (data.potensi || "").split(/[,;]/).map(s => s.trim()).filter(Boolean);
 
+  let mapsSrc = data.maps_url || "";
+  if (mapsSrc.includes("<iframe") && mapsSrc.includes("src=")) {
+    const match = mapsSrc.match(/src=["'](.*?)["']/);
+    if (match && match[1]) mapsSrc = match[1];
+  }
+
   el.innerHTML = `
     <div class="profil-hero">
       ${data.logo_url ? `<img class="profil-logo" src="${esc(imgUrl(data.logo_url))}" alt="${esc(data.village_name)}" />` : `<div class="profil-logo">🏡</div>`}
