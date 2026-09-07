@@ -334,14 +334,6 @@ async function getSiteConfig() {
   return data;
 }
 
-async function loadProfil() {
-  const data = await getSiteConfig();
-  const el = document.getElementById("profil-content");
-  if (!data) { el.innerHTML = `<div class="empty">Data profil belum tersedia.</div>`; return; }
-
-  const visi = data.visi, misi = data.misi;
-  const potensi = (data.potensi || "").split(/[,;]/).map(s => s.trim()).filter(Boolean);
-
 // Helper: render peta — iframe jika embed URL, card link jika URL biasa
 function renderMapBlock(rawUrl, containerClass = "profil-block") {
   if (!rawUrl) return "";
@@ -379,6 +371,16 @@ function renderMapBlock(rawUrl, containerClass = "profil-block") {
     </div>
   </div>`;
 }
+
+async function loadProfil() {
+  const data = await getSiteConfig();
+  const el = document.getElementById("profil-content");
+  if (!data) { el.innerHTML = `<div class="empty">Data profil belum tersedia.</div>`; return; }
+
+  const visi = data.visi, misi = data.misi;
+  const potensi = (data.potensi || "").split(/[,;]/).map(s => s.trim()).filter(Boolean);
+
+
 
   el.innerHTML = `
     <div class="profil-hero">
