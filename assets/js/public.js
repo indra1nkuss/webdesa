@@ -886,10 +886,19 @@ async function loadKontak() {
       ${data.jam_layanan ? `<div class="row"><span class="ic">🕒</span><span>${esc(data.jam_layanan)}</span></div>` : ""}
       ${wa ? `<a class="btn whatsapp" href="${wa}" target="_blank">💬 Chat WhatsApp Desa</a>` : ""}
     </div>
-    ${data.maps_url ? `<div class="contact-box">
+    ${(()=>{
+      let ms = data.maps_url || "";
+      if (ms.includes("<iframe") && ms.includes("src=")) {
+        const m = ms.match(/src=["'](.*?)["']/);
+        if (m && m[1]) ms = m[1];
+      }
+      if (!ms.startsWith("http")) return "";
+      return `<div class="contact-box">
       <h3>📍 Lokasi Desa</h3>
-      <iframe class="map-frame" src="${esc(data.maps_url)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>` : ""}
+      <iframe class="map-frame" src="${ms}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      <a class="btn secondary" style="margin-top:10px;display:inline-flex;width:100%;justify-content:center" href="${ms}" target="_blank">🗺️ Buka di Google Maps</a>
+    </div>`;
+    })()}
     ${(fb || ig) ? `<div class="contact-box">
       <h3>🌐 Media Sosial</h3>
       <div class="soc-btns">
@@ -985,7 +994,7 @@ async function init() {
     document.getElementById("hero-name").textContent = data.village_name || "Desa";
     document.getElementById("hero-motto").textContent = data.motto || "";
     document.getElementById("nav-name").textContent = data.village_name || "Desa";
-    updateOfficeStatus(data.jam_layanan);
+    updateOfficeStatus();
 
     if (data.logo_url) {
       const url = `url(${esc(imgUrl(data.logo_url))})`;
@@ -1012,7 +1021,7 @@ async function init() {
   } else {
     document.getElementById("hero-name").textContent = "Desa";
     document.getElementById("nav-name").textContent = "Desa";
-    updateOfficeStatus(null);
+    updateOfficeStatus();
   }
 
   const loaders = {
@@ -1044,4 +1053,42 @@ function shade(hex, percent) {
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
+// ---------------------------------------------------------------------
+// JAM BERJALAN WIB — update setiap detik
+// ---------------------------------------------------------------------
+function startLiveClock() {
+  const timeEl = document.getElementById("live-clock-time");
+  const dateEl = document.getElementById("live-clock-date");
+  if (!timeEl) return;
+
+  const DAYS_ID = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+  const MONTHS_ID = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+
+  function tick() {
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    const wib = new Date(utc + 3600000 * 7);
+
+    const h = String(wib.getHours()).padStart(2, "0");
+    const m = String(wib.getMinutes()).padStart(2, "0");
+    const s = String(wib.getSeconds()).padStart(2, "0");
+    timeEl.textContent = `${h}:${m}:${s}`;
+
+    if (dateEl) {
+      const day  = DAYS_ID[wib.getDay()];
+      const date = wib.getDate();
+      const mon  = MONTHS_ID[wib.getMonth()];
+      const year = wib.getFullYear();
+      dateEl.textContent = `${day}, ${date} ${mon} ${year}`;
+    }
+
+    // Update status kantor setiap detik juga
+    updateOfficeStatus();
+  }
+
+  tick();
+  setInterval(tick, 1000);
+}
+
 init();
+startLiveClock();
