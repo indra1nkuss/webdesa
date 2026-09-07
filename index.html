@@ -14,6 +14,14 @@
   <script src="assets/vendor/supabase.js"></script>
   <!-- GSAP untuk animasi (lokal) -->
   <script src="assets/vendor/gsap.min.js"></script>
+  <!-- Bersihkan Service Worker "hantu" sisa proyek/ekstensi lama yang menyebabkan error preload -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) { registration.unregister(); }
+      });
+    }
+  </script>
 </head>
 <body>
   <div class="app">
