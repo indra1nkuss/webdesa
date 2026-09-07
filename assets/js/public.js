@@ -354,8 +354,6 @@ function renderMapBlock(rawUrl, containerClass = "profil-block") {
       <h3>🗺️ Lokasi Desa</h3>
       <iframe class="map-frame" src="${url}" loading="lazy"
         referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      <a class="btn secondary" style="margin-top:10px;display:flex;justify-content:center"
-         href="${url}" target="_blank">🗺️ Buka di Google Maps</a>
     </div>`;
   }
 
