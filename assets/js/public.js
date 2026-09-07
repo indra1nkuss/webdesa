@@ -342,11 +342,43 @@ async function loadProfil() {
   const visi = data.visi, misi = data.misi;
   const potensi = (data.potensi || "").split(/[,;]/).map(s => s.trim()).filter(Boolean);
 
-  let mapsSrc = data.maps_url || "";
-  if (mapsSrc.includes("<iframe") && mapsSrc.includes("src=")) {
-    const match = mapsSrc.match(/src=["'](.*?)["']/);
-    if (match && match[1]) mapsSrc = match[1];
+// Helper: render peta — iframe jika embed URL, card link jika URL biasa
+function renderMapBlock(rawUrl, containerClass = "profil-block") {
+  if (!rawUrl) return "";
+
+  // Ekstrak src jika yang disisipkan adalah tag <iframe>
+  let url = rawUrl.trim();
+  if (url.includes("<iframe") && url.includes("src=")) {
+    const m = url.match(/src=["'](.*?)["']/);
+    if (m && m[1]) url = m[1];
   }
+
+  if (!url.startsWith("http")) return "";
+
+  const isEmbed = url.includes("/maps/embed");
+
+  if (isEmbed) {
+    return `<div class="${containerClass}">
+      <h3>🗺️ Lokasi Desa</h3>
+      <iframe class="map-frame" src="${url}" loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      <a class="btn secondary" style="margin-top:10px;display:flex;justify-content:center"
+         href="${url}" target="_blank">🗺️ Buka di Google Maps</a>
+    </div>`;
+  }
+
+  // URL biasa (bukan embed) — tampilkan placeholder + tombol
+  return `<div class="${containerClass}">
+    <h3>🗺️ Lokasi Desa</h3>
+    <div class="map-placeholder">
+      <div class="map-ph-icon">📍</div>
+      <p class="map-ph-text">Klik tombol di bawah untuk membuka lokasi desa di Google Maps</p>
+      <a class="btn" href="${url}" target="_blank" rel="noopener noreferrer">
+        🗺️ Buka di Google Maps
+      </a>
+    </div>
+  </div>`;
+}
 
   el.innerHTML = `
     <div class="profil-hero">
@@ -383,10 +415,7 @@ async function loadProfil() {
       <p>${esc(data.alamat_kantor)}</p>
     </div>` : ""}
 
-    ${mapsSrc ? `<div class="profil-block">
-      <h3>🗺️ Lokasi Desa</h3>
-      <iframe class="map-frame" src="${mapsSrc}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>` : ""}
+    ${renderMapBlock(data.maps_url)}
   `;
 }
 
@@ -886,19 +915,7 @@ async function loadKontak() {
       ${data.jam_layanan ? `<div class="row"><span class="ic">🕒</span><span>${esc(data.jam_layanan)}</span></div>` : ""}
       ${wa ? `<a class="btn whatsapp" href="${wa}" target="_blank">💬 Chat WhatsApp Desa</a>` : ""}
     </div>
-    ${(()=>{
-      let ms = data.maps_url || "";
-      if (ms.includes("<iframe") && ms.includes("src=")) {
-        const m = ms.match(/src=["'](.*?)["']/);
-        if (m && m[1]) ms = m[1];
-      }
-      if (!ms.startsWith("http")) return "";
-      return `<div class="contact-box">
-      <h3>📍 Lokasi Desa</h3>
-      <iframe class="map-frame" src="${ms}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      <a class="btn secondary" style="margin-top:10px;display:inline-flex;width:100%;justify-content:center" href="${ms}" target="_blank">🗺️ Buka di Google Maps</a>
-    </div>`;
-    })()}
+    ${renderMapBlock(data.maps_url, "contact-box")}
     ${(fb || ig) ? `<div class="contact-box">
       <h3>🌐 Media Sosial</h3>
       <div class="soc-btns">
