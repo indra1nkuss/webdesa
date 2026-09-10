@@ -36,14 +36,44 @@ async function uploadImage(file, prefix) {
 }
 
 // ---------------------------------------------------------------------
-// AUTH
+// AUTH & SESSION TIMEOUT (12 Jam Inaktivitas)
 // ---------------------------------------------------------------------
+const INACTIVITY_LIMIT = 12 * 60 * 60 * 1000; // 12 jam
+
+function updateActivity() {
+  if (window.__dashReady) {
+    localStorage.setItem("admin_last_activity", Date.now());
+  }
+}
+
+function checkInactivity() {
+  if (!window.__dashReady) return;
+  const lastActivity = localStorage.getItem("admin_last_activity");
+  if (lastActivity && Date.now() - parseInt(lastActivity) > INACTIVITY_LIMIT) {
+    sb.auth.signOut().then(() => {
+      localStorage.removeItem("admin_last_activity");
+      alert("Sesi Anda telah berakhir karena tidak ada aktivitas selama 12 jam. Silakan login kembali.");
+      location.reload();
+    });
+  }
+}
+
+// Pantau aktivitas admin
+['mousemove', 'keydown', 'click', 'scroll'].forEach(evt => {
+  window.addEventListener(evt, updateActivity);
+});
+
+// Cek secara periodik setiap menit
+setInterval(checkInactivity, 60000);
+
 document.getElementById("btn-login").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
   document.getElementById("auth-msg").textContent = "";
   const { error } = await sb.auth.signInWithPassword({ email, password });
   if (error) { document.getElementById("auth-msg").textContent = error.message; return; }
+  
+  localStorage.setItem("admin_last_activity", Date.now()); // Set waktu saat login
   showDash(); // langsung tampilkan dashboard setelah login berhasil
 });
 
@@ -79,6 +109,23 @@ sb.auth.onAuthStateChange((_event, session) => {
 function showDash() {
   // Hindari inisialisasi ganda jika dipanggil dari login + onAuthStateChange
   if (window.__dashReady) return;
+  
+  // Cek apakah sisa session (activity) sudah kedaluwarsa sebelum benar-benar masuk
+  const lastActivity = localStorage.getItem("admin_last_activity");
+  if (lastActivity && Date.now() - parseInt(lastActivity) > INACTIVITY_LIMIT) {
+    sb.auth.signOut().then(() => {
+      localStorage.removeItem("admin_last_activity");
+      alert("Sesi Anda telah berakhir karena tidak ada aktivitas selama 12 jam. Silakan login kembali.");
+      location.reload();
+    });
+    return; // Stop inisialisasi
+  }
+  
+  // Update last activity jika ini pertama kali showDash (misal karena onAuthStateChange saat reload)
+  if (!lastActivity) {
+    localStorage.setItem("admin_last_activity", Date.now());
+  }
+
   window.__dashReady = true;
   document.getElementById("auth-screen").style.display = "none";
   document.getElementById("dash-screen").style.display = "block";
